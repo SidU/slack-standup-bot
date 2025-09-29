@@ -32,6 +32,12 @@
   "dependencies": {
     "@azure/data-tables": "^13.2.2",
     "@microsoft/teams-ai": "^1.7.4",
+    "@microsoft/teams.api": "^2.0.1",
+    "@microsoft/teams.apps": "^2.0.1",
+    "@microsoft/teams.cards": "^2.0.1",
+    "@microsoft/teams.common": "^2.0.1",
+    "@microsoft/teams.dev": "^2.0.1",
+    "@microsoft/teams.graph": "^2.0.1",
     "botbuilder": "^4.21.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2"
