@@ -3,3 +3,4 @@ env.sh
 .env
 npm-debug.log
 coverage
+dist
