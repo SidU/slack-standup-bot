@@ -1,21 +1,22 @@
 {
-  "name": "slack-standup-bot",
-  "version": "0.0.2",
-  "description": "Standup Bot for Slack",
-  "main": "index.js",
+  "name": "teams-standup-bot",
+  "version": "1.0.0",
+  "description": "Standup Bot for Microsoft Teams",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "start": "npm run bot",
-    "bot": "node index.js",
-    "ci": "npm test && cat ./coverage/lcov.info | coveralls",
-    "unit-test": "istanbul cover --report lcov --dir ./coverage/ _mocha --recursive ./test --grep ./test/**/*.spec.js -- --colors --reporter spec",
-    "pretest": "jshint index.js ./src ./test && jscs index.js ./src ./test",
-    "test": "npm run unit-test --silent"
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint \"src/**/*.ts\"",
+    "start": "node dist/index.js",
+    "test": "jest"
   },
   "engines": {
-    "node": "0.12.7"
+    "node": ">=18"
   },
   "keywords": [
-    "Slack",
+    "Teams",
     "Standup"
   ],
   "repository": {
@@ -29,24 +30,30 @@
   "author": "Cole Furfaro-Strode",
   "license": "ISC",
   "dependencies": {
-    "botkit": "0.2.2",
-    "botkit-storage-redis": "^1.0.0",
-    "express": "^4.13.3",
-    "lodash": "^4.13.0",
-    "moment": "^2.15.1",
-    "q": "^1.4.1",
-    "redis": "^2.5.1"
+    "@azure/data-tables": "^13.2.2",
+    "@microsoft/teams-ai": "^1.7.4",
+    "@microsoft/teams.api": "^2.0.1",
+    "@microsoft/teams.apps": "^2.0.1",
+    "@microsoft/teams.cards": "^2.0.1",
+    "@microsoft/teams.common": "^2.0.1",
+    "@microsoft/teams.dev": "^2.0.1",
+    "@microsoft/teams.graph": "^2.0.1",
+    "botbuilder": "^4.21.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "chai": "^3.4.1",
-    "coveralls": "^2.11.6",
-    "istanbul": "^0.4.1",
-    "jscs": "^3.0.2",
-    "jshint": "^2.9.1",
-    "mocha": "^3.0.0",
-    "proxyquire": "^1.7.3",
-    "sinon": "^1.17.2",
-    "sinon-chai": "^2.8.0",
-    "xunit-file": "1.0.0"
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.7",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "rimraf": "^5.0.5",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
   }
 }

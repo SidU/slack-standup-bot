@@ -1,1 +1,1 @@
-slack: npm run-script bot
+web: node dist/index.js
