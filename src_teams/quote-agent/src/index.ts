@@ -1,29 +1,61 @@
-import { App } from '@microsoft/teams.apps';
-import { ChatPrompt, Message } from '@microsoft/teams.ai';
-import { LocalStorage } from '@microsoft/teams.common/storage';
-import { DevtoolsPlugin } from '@microsoft/teams.dev';
-import { OpenAIChatModel } from '@microsoft/teams.openai';
+import express from 'express';
+import * as dotenv from 'dotenv';
+import { Application } from '@microsoft/teams-ai';
+import { TeamsAdapter } from '@microsoft/teams-ai/lib/TeamsAdapter';
+import {
+  ConfigurationServiceClientCredentialFactory,
+  MemoryStorage
+} from 'botbuilder';
+import { StandupRepository } from './repository';
+import { StandupManager } from './standupManager';
+import { StandupTeamsBot } from './bot';
 
-const storage = new LocalStorage<Array<Message>>();
-const app = new App({
+dotenv.config();
+
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3978;
+
+const credentialsFactory = new ConfigurationServiceClientCredentialFactory({
+  MicrosoftAppId: process.env.MICROSOFT_APP_ID ?? '',
+  MicrosoftAppPassword: process.env.MICROSOFT_APP_PASSWORD ?? '',
+  MicrosoftAppType: process.env.MICROSOFT_APP_TYPE,
+  MicrosoftAppTenantId: process.env.MICROSOFT_APP_TENANT_ID
+});
+
+const adapter = new TeamsAdapter(undefined, credentialsFactory);
+adapter.onTurnError = async (context, error) => {
+  console.error('Bot encountered an error:', error);
+  await context.sendActivity('Sorry, something went wrong. Please try again.');
+};
+
+const storage = new MemoryStorage();
+
+const application = new Application({
+  adapter,
   storage,
-  plugins: [new DevtoolsPlugin()],
+  botAppId: process.env.MICROSOFT_APP_ID,
+  removeRecipientMention: true,
+  startTypingTimer: false,
+  longRunningMessages: false
 });
 
-app.on('message', async ({ stream, activity }) => {
-  const prompt = new ChatPrompt({
-    messages: storage.get(`${activity.conversation.id}/${activity.from.id}`),
-    model: new OpenAIChatModel({
-      model: 'gpt-4o',
-      apiKey: process.env.OPENAI_API_KEY,
-    }),
-  });
+const repository = new StandupRepository(storage);
+const manager = new StandupManager(repository);
+const bot = new StandupTeamsBot(application, manager);
+bot.register();
 
-  await prompt.send(activity.text, {
-    onChunk: (chunk) => stream.emit(chunk),
+const server = express();
+server.use(express.json());
+
+server.post('/api/messages', async (req, res) => {
+  await adapter.process(req, res, async (context) => {
+    await application.run(context);
   });
 });
 
-(async () => {
-  await app.start(process.env.PORT || 3978);
-})();
+server.get('/', (_req, res) => {
+  res.send('Stand-up bot is running.');
+});
+
+server.listen(port, () => {
+  console.log(`Stand-up bot listening on port ${port}`);
+});
